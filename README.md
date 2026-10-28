@@ -21,7 +21,7 @@ Navigating to Statistics -> Conversations -> IPv4 revealed the following communi
 
 ### Triage Image Reference
 The baseline workspace profile captured during initial protocol mapping:
-[Insert Image:Screenshot_2026-10-27_17-08-52]
+[Baseline Workspace Profile]:(Screenshot_2026-10-27_17-08-52)
 
 ### Deducing System Roles
 * The Target Asset (172.28.0.10): This machine acts as the shared server destination for all network endpoints. Operating over Modbus TCP standard port 502, this represents the physical Programmable Logic Controller (PLC) managing the pipeline hardware mechanics.
@@ -40,7 +40,7 @@ To overcome this, the internal search layout engine in Wireshark was reconfigure
 
 ### Filter Setup Image Reference
 The explicit Wireshark configuration applied to execute the text segment extraction:
-[Insert Image: Root_2026-10-27_18-24-18]
+[Baseline Workspace Profile] (Root_2026-10-27_18-24-18)
 
 ---
 
@@ -58,7 +58,7 @@ While the loud secondary asset host 172.28.0.20 swamped the pipeline network fir
 
 ### The Live Triage Capture
 The exact moment Packet 2222 was intercepted and flagged in the network stream:
-[Insert Image: Screenshot_2026-10-27_17-09-18]
+[Baseline Workspace Profile]: (Screenshot_2026-10-27_17-09-18)
 
 * Answer Found (Attacker IP): r00t{172.28.0.66}
 
