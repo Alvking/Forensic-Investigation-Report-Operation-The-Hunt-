@@ -21,11 +21,12 @@ Navigating to Statistics -> Conversations -> IPv4 revealed the following communi
 
 ### Triage Image Reference
 The baseline workspace profile captured during initial protocol mapping:
-![Baseline Workspace Profile](Screenshot_2026-10-27_17-08-52)
+![Baseline workspace profile](Screenshot_2026-10-27_17-08-52.png)
 
 ### Deducing System Roles
-* The Target Asset (172.28.0.10): This machine acts as the shared server destination for all network endpoints. Operating over Modbus TCP standard port 502, this represents the physical Programmable Logic Controller (PLC) managing the pipeline hardware mechanics.
-* The Engineer Workstation (172.28.0.30): Unlike the intense flooding anomalies, .30 maintains an isolated, low-overhead transmission signature consisting of routine Read Coils telemetry updates. This aligns perfectly with a human engineer's Human-Machine Interface (HMI) console monitoring device safety statuses.
+* The Target Asset (172.28.0.10): This machine acts as the shared server destination for all network endpoints. Operating over Modbus TCP standard port 502, this represents the physical programmable logic controller (PLC) and the central target system under investigation.
+* The Engineer Workstation (172.28.0.30): Unlike the intense flooding anomalies, .30 maintains an isolated, low-overhead transmission signature consisting of routine Read Coils telemetry updates. This indicates a legitimate engineering endpoint engaged in normal supervisory diagnostics rather than exploitation activity.
+* The Adversary Host (172.28.0.66): This system exhibits a highly focused sequence of register-write operations, consistent with a malicious Modbus write payload injection against the industrial control process.
 
 * Answer Found (Engineer IP): r00t{172.28.0.30}
 * The Answer is found (attacker IP address): r00t{172.28.0.66}
@@ -34,13 +35,13 @@ The baseline workspace profile captured during initial protocol mapping:
 
 ## 2. Advanced Packet Byte Filter Configuration
 
-Because the flag payload was nested within an active industrial register configuration using distinct byte-spacing signatures, standard terminal-line text parsers (such as standard strings filtering) returned blank results. 
+Because the flag payload was nested within an active industrial register configuration using distinct byte-spacing signatures, standard terminal-line text parsers (such as standard strings filtering) could not reliably surface the hidden data.
 
-To overcome this, the internal search layout engine in Wireshark was reconfigured to target the Packet Bytes memory structures directly for a raw String literal (r00t). This bypassed high-level application string constraints and scanned the raw data segments.
+To overcome this, the internal search layout engine in Wireshark was reconfigured to target the Packet Bytes memory structures directly for a raw String literal (r00t). This bypassed high-level application-layer filtering and exposed the embedded hidden text contained within the Modbus payload stream.
 
 ### Filter Setup Image Reference
-The explicit Wireshark configuration applied to execute the text segment extraction: 
-![Baseline Workspace Profile](Root_2026-10-27_18-24-18)
+The explicit Wireshark configuration applied to execute the text segment extraction:
+![Wireshark byte filter setup](Root_2026-10-27_18-24-18.png)
 
 ---
 
@@ -54,11 +55,11 @@ Executing the byte query across the transmission log immediately isolated Packet
 * Function Protocol: Modbus TCP Function Code 16 (Write Multiple Registers)
 
 ### Attack Methodology Analysis
-While the loud secondary asset host 172.28.0.20 swamped the pipeline network firewalls with high-volume scanning traffic to occupy system alerts and distract operators, the primary threat actor machine 172.28.0.66 utilized that exact operational window to execute unauthorized write registers commands, planting the exploit string directly into the memory bank registers of the PLC.
+While the loud secondary asset host 172.28.0.20 swamped the pipeline network firewalls with high-volume scanning traffic to occupy system alerts and distract operators, the primary threat actor machine 172.28.0.66 focused on the industrial process controller and executed a precisely targeted register tampering sequence.
 
 ### The Live Triage Capture
 The exact moment Packet 2222 was intercepted and flagged in the network stream:
-![Baseline Workspace Profile](Screenshot_2026-10-27_17-09-18)
+![Live triage capture](Screenshot_2026-10-27_17-09-18.png)
 
 * Answer Found (Attacker IP): r00t{172.28.0.66}
 
@@ -66,6 +67,10 @@ The exact moment Packet 2222 was intercepted and flagged in the network stream:
 
 ## 4. Decoding the Payload Values
 
-Isolating the hex pane at offsets 0060 through 0080 in the lower right section of the highlighted Packet 2222 exposed the literal registers holding the hidden flag text. 
+Isolating the hex pane at offsets 0060 through 0080 in the lower-right section of the highlighted Packet 2222 exposed the literal registers holding the hidden flag text.
 
 Because the protocol transmits characters using standard null-padded spacing configurations (UTF-16 spacing layouts), the hex characters were translated sequentially to extract the exact flag value:
+
+```text
+r00t{modbus_write_ghostflag_172_28_0_66}
+```
